@@ -1,0 +1,5 @@
+.DS_STORE
+tgbot/config copy.py
+cs.py
+__pycache__
+.vscode
