@@ -3,3 +3,6 @@ tgbot/config copy.py
 cs.py
 __pycache__
 .vscode
+
+.handler-saves
+1

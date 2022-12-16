@@ -1,2 +1,4 @@
-aiohttp
-aioredis
+pyTelegramBotAPI==4.8.0
+redis==3.5.3
+requests==2.26.0
+py-ztj-aria2rpc

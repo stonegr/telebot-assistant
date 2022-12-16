@@ -1,6 +1,7 @@
 from telebot import TeleBot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+import time
 
 from columns import aria2
 from .. import config
@@ -59,35 +60,13 @@ def inline_keyboard(key_type):
         markup.row_width = 1
         if isinstance(d, str):
             return
-        _tasks_active = [
-            v.get("gid") for v in d.values() if v.get("status") == "active"
-        ]
-        _tasks_pause = [v.get("gid") for v in d.values() if v.get("status") == "paused"]
-        _tasks_stop = [
-            v.get("gid") for v in d.values() if v.get("status") == "complete"
-        ]
-        _tasks_error = [v.get("gid") for v in d.values() if v.get("status") == "error"]
-        _tasks_removed = [
-            v.get("gid") for v in d.values() if v.get("status") == "removed"
-        ]
-        _tasks_all = [v.get("gid") for v in d.values()]
         markup.add(
-            InlineKeyboardButton(
-                "删除正在下载", callback_data="删除正在下载_" + ";".join(_tasks_active)
-            ),
-            InlineKeyboardButton(
-                "删除已暂停", callback_data="删除已暂停_" + ";".join(_tasks_pause)
-            ),
-            InlineKeyboardButton(
-                "删除已完成", callback_data="删除已完成_" + ";".join(_tasks_stop)
-            ),
-            InlineKeyboardButton(
-                "删除错误任务", callback_data="删除错误_" + ";".join(_tasks_error)
-            ),
-            InlineKeyboardButton(
-                "删除removed", callback_data="删除removed_" + ";".join(_tasks_removed)
-            ),
-            # InlineKeyboardButton("删除所有", callback_data="删除所有_" + ";".join(_tasks_all)),
+            InlineKeyboardButton("删除正在下载", callback_data="删除正在下载"),
+            InlineKeyboardButton("删除已暂停", callback_data="删除已暂停"),
+            InlineKeyboardButton("删除已完成", callback_data="删除已完成"),
+            InlineKeyboardButton("删除错误任务", callback_data="删除错误"),
+            InlineKeyboardButton("删除removed", callback_data="删除removed"),
+            InlineKeyboardButton("删除所有", callback_data="删除所有"),
         )
         for k, v in d.items():
             markup.add(
@@ -97,20 +76,87 @@ def inline_keyboard(key_type):
 
 
 def inline_callback(call, bot: TeleBot):
+    n = 0
     if call.json["message"]["text"] == "请点击要暂停的任务":
         _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
         _aria2_tmp.pause(call.data.split("_")[1])
         bot.answer_callback_query(call.id, "paused")
+        while n < 5:
+            try:
+                time.sleep(1)
+                bot.edit_message_reply_markup(
+                    chat_id=call.message.chat.id,
+                    message_id=call.message.message_id,
+                    reply_markup=inline_keyboard("暂停任务"),
+                )
+                break
+            except Exception as e:
+                print(e)
+                n += 1
     elif call.json["message"]["text"] == "请点击要继续的任务":
         _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
         _aria2_tmp.un_pause(call.data.split("_")[1])
         bot.answer_callback_query(call.id, "started")
+        while n < 5:
+            try:
+                time.sleep(1)
+                bot.edit_message_reply_markup(
+                    chat_id=call.message.chat.id,
+                    message_id=call.message.message_id,
+                    reply_markup=inline_keyboard("继续任务"),
+                )
+                break
+            except Exception as e:
+                print(e)
+                n += 1
     elif call.json["message"]["text"] == "请点击要删除的任务":
         _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
         if call.data.split("_")[0] != "删除":
-            for i in call.data.split("_")[1].split(";"):
+            d = _aria2_tmp.format_acivate_paused_stop()
+            if call.data.split("_")[0] == "删除正在下载":
+                _tasks_do = [
+                    v.get("gid") for v in d.values() if v.get("status") == "active"
+                ]
+            elif call.data.split("_")[0] == "删除已暂停":
+
+                _tasks_do = [
+                    v.get("gid") for v in d.values() if v.get("status") == "paused"
+                ]
+            elif call.data.split("_")[0] == "删除已完成":
+                _tasks_do = [
+                    v.get("gid") for v in d.values() if v.get("status") == "complete"
+                ]
+            elif call.data.split("_")[0] == "删除错误":
+                _tasks_do = [
+                    v.get("gid") for v in d.values() if v.get("status") == "error"
+                ]
+            elif call.data.split("_")[0] == "删除removed":
+                _tasks_do = [
+                    v.get("gid") for v in d.values() if v.get("status") == "removed"
+                ]
+            elif call.data.split("_")[0] == "删除所有":
+                _tasks_do = [v.get("gid") for v in d.values()]
+            for i in _tasks_do:
                 if i != "":
                     _aria2_tmp.remove_noerror(i)
         else:
             _aria2_tmp.remove_noerror(call.data.split("_")[1])
-        bot.answer_callback_query(call.id, "deleted")
+        if call.data.split("_")[0] == "删除正在下载":
+            bot.answer_callback_query(
+                call.id,
+                "please click 删除removed again.",
+            )
+        else:
+            bot.answer_callback_query(call.id, "deleted")
+        while n < 5:
+            try:
+                time.sleep(1)
+                bot.edit_message_reply_markup(
+                    chat_id=call.message.chat.id,
+                    message_id=call.message.message_id,
+                    reply_markup=inline_keyboard("删除任务"),
+                )
+                break
+            except Exception as e:
+                print(e)
+                n += 1
