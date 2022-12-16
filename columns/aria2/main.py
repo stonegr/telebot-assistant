@@ -111,7 +111,7 @@ class Aria2_do(Aria2Rpc):
             _d_tmp[base.Get_movie_name(i["files"][0]["path"])] = i["gid"]
         return _d_tmp
 
-    def format_acivate_paused_stop(self):
+    def format_acivate_paused_stop(self, default="无任务"):
         """
         返回正在下载,暂停,已停止
         """
@@ -124,7 +124,7 @@ class Aria2_do(Aria2Rpc):
                 "status": i["status"],
             }
         if not _all:
-            return "无任务"
+            return default
         return _all
 
     def monitor_active(self, bot: TeleBot):
@@ -133,11 +133,11 @@ class Aria2_do(Aria2Rpc):
         """
         while True:
             if not hasattr(self, "now_data"):
-                self.now_data = self.init_data()
+                self.now_data = self.format_acivate_paused_stop({})
             else:
-                _new_data = self.init_data()
+                _new_data = self.format_acivate_paused_stop({})
                 for k, v in self.now_data.items():
-                    if k not in _new_data and v.get("status") == "active":
+                    if _new_data[k] == "complete" and v.get("status") == "active":
                         for i in config.NOTIFY_USER_ID.split(","):
                             bot.send_message(i, "{} completed!".format(k))
                 self.now_data = _new_data

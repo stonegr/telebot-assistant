@@ -90,9 +90,12 @@ from columns import aria2
 
 aria2.Moniter_active(bot)
 
+# bot.enable_save_next_step_handlers(delay=2)
+# bot.load_next_step_handlers()
+
 
 def run():
-    bot.infinity_polling()
+    bot.infinity_polling(skip_pending=True)
 
 
 run()

@@ -1,0 +1,6 @@
+systemctl start tgbot
+systemctl status tgbot
+
+systemctl restart tgbot
+
+systemctl enable tgbot
