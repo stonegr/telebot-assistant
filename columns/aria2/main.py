@@ -14,13 +14,9 @@ class Aria2_do(Aria2Rpc):
         # super(Aria2Rpc,self).__init__(uri, secret)
         Aria2Rpc.__init__(self, uri, secret)
 
-    def get_store(self):
-        """
-        获取正在下载和已下载的数据
-        """
-        _data = {}
-        _active = self.tell_active()
-        _wait = ""
+        self.active = {}
+        self.waiting = {}
+        self.stopped = {}
 
     def list_methods(self):
         """列出所有可用方法"""
@@ -38,8 +34,8 @@ class Aria2_do(Aria2Rpc):
 
     def init_data(self):
         _data_tmp = {}
-        _downloading_list = self.tell_active()
-        _waiting_list = self.tell_waiting(0, config.ARIA2_DEPTH)
+        _downloading_list = self.active
+        _waiting_list = self.waiting
         for i in _downloading_list:
             _data_tmp[base.Get_movie_name(i["files"][0]["path"])] = {
                 "gid": i["gid"],
@@ -53,7 +49,7 @@ class Aria2_do(Aria2Rpc):
         return _data_tmp
 
     def format_downloading(self):
-        d = self.tell_active()
+        d = self.active
         if not d:
             return "无任务"
 
@@ -71,7 +67,7 @@ class Aria2_do(Aria2Rpc):
         return _d_tmp.rstrip("\n\n")
 
     def format_stoped(self):
-        d = self.tell_stopped(0, config.ARIA2_DEPTH)
+        d = self.stopped
         if not d:
             return "无已完成任务"
 
@@ -92,7 +88,7 @@ class Aria2_do(Aria2Rpc):
         """
         格式化正在下载的任务用于暂停
         """
-        d = self.tell_active()
+        d = self.active
         if not d:
             return "无任务"
         _d_tmp = {}
@@ -101,7 +97,7 @@ class Aria2_do(Aria2Rpc):
         return _d_tmp
 
     def format_download_pause(self):
-        d = self.tell_waiting(0, config.ARIA2_DEPTH)
+        d = self.waiting
         if not d:
             return "无任务"
         _d_tmp = {}
@@ -115,7 +111,7 @@ class Aria2_do(Aria2Rpc):
         """
         _all = {}
         _all.update(self.init_data())
-        _stoped = self.tell_stopped(0, config.ARIA2_DEPTH)
+        _stoped = self.stopped
         for i in reversed(_stoped):
             _all[base.Get_movie_name(i["files"][0]["path"])] = {
                 "gid": i["gid"],
@@ -129,6 +125,9 @@ class Aria2_do(Aria2Rpc):
         """
         检测是否有下载成功的任务
         """
+        # 验证是否是第一次
+        time.sleep(5)
+
         while True:
             if not hasattr(self, "now_data"):
                 self.now_data = self.format_acivate_paused_stop({})
@@ -136,13 +135,13 @@ class Aria2_do(Aria2Rpc):
                 _new_data = self.format_acivate_paused_stop({})
                 for k, v in self.now_data.items():
                     if (
-                        _new_data[k].get("status") == "complete"
+                        _new_data.get(k, {}).get("status") == "complete"
                         and v.get("status") == "active"
                     ):
                         for i in config.NOTIFY_USER_ID.split(","):
                             bot.send_message(i, "{} completed!".format(k))
                 for k, v in _new_data.items():
-                    if _new_data[k].get("status") == "active" and (
+                    if _new_data.get(k, {}).get("status") == "active" and (
                         k not in self.now_data
                     ):
                         for i in config.NOTIFY_USER_ID.split(","):
@@ -150,12 +149,35 @@ class Aria2_do(Aria2Rpc):
                 self.now_data = _new_data
             time.sleep(2)
 
+    def flush_aria2_status(self):
+        while True:
+            try:
+                self.active = self.tell_active()
+                self.waiting = self.tell_waiting(0, config.ARIA2_DEPTH)
+                self.stopped = self.tell_stopped(0, config.ARIA2_DEPTH)
+                time.sleep(1)
+            except Exception as e:
+                pass
+
+
+_tgbot_tmp = Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
+
 
 def Moniter_active(bot: TeleBot):
 
     t = threading.Thread(
-        target=Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT).monitor_active,
+        target=_tgbot_tmp.monitor_active,
         args=(bot,),
+    )
+    t.start()
+
+
+def Flush_data():
+    """
+    刷新数据
+    """
+    t = threading.Thread(
+        target=_tgbot_tmp.flush_aria2_status,
     )
     t.start()
 

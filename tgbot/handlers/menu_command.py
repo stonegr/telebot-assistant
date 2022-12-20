@@ -61,17 +61,13 @@ def aria2_handle(message: Message, bot: TeleBot):
         bot.register_next_step_handler(msg, add_aria2_task, bot)
         return
     elif message.text == "▶️正在下载":
-        _aria2_downloading = aria2.Aria2_do(
-            config.ARIA2_URL, config.ARIA2_SECREAT
-        ).format_downloading()
+        _aria2_downloading = aria2._tgbot_tmp.format_downloading()
         msg = bot.reply_to(
             message,
             _aria2_downloading,
         )
     elif message.text == "☑️已完成":
-        _aria2_paused = aria2.Aria2_do(
-            config.ARIA2_URL, config.ARIA2_SECREAT
-        ).format_stoped()
+        _aria2_paused = aria2._tgbot_tmp.format_stoped()
         msg = bot.reply_to(
             message,
             _aria2_paused,

@@ -34,8 +34,7 @@ def keyboard(key_type="Normal"):
 def inline_keyboard(key_type):
     markup = InlineKeyboardMarkup()
     if key_type == "暂停任务":
-        _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
-        d = _aria2_tmp.format_pause_download()
+        d = aria2._tgbot_tmp.format_pause_download()
 
         markup.row_width = 1
         if isinstance(d, str):
@@ -45,8 +44,7 @@ def inline_keyboard(key_type):
                 InlineKeyboardButton(k, callback_data="暂停任务_" + v),
             )
     elif key_type == "继续任务":
-        _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
-        d = _aria2_tmp.format_download_pause()
+        d = aria2._tgbot_tmp.format_download_pause()
         markup.row_width = 1
         if isinstance(d, str):
             return
@@ -55,8 +53,7 @@ def inline_keyboard(key_type):
                 InlineKeyboardButton(k, callback_data="继续任务_" + v),
             )
     elif key_type == "删除任务":
-        _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
-        d = _aria2_tmp.format_acivate_paused_stop()
+        d = aria2._tgbot_tmp.format_acivate_paused_stop()
         markup.row_width = 1
         if isinstance(d, str):
             return
@@ -112,7 +109,7 @@ def inline_callback(call, bot: TeleBot):
     elif call.json["message"]["text"] == "请点击要删除的任务":
         _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
         if call.data.split("_")[0] != "删除":
-            d = _aria2_tmp.format_acivate_paused_stop()
+            d = aria2._tgbot_tmp.format_acivate_paused_stop()
             if call.data.split("_")[0] == "删除正在下载":
                 _tasks_do = [
                     v.get("gid") for v in d.values() if v.get("status") == "active"

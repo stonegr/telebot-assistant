@@ -8,5 +8,7 @@ systemctl enable tgbot
 docker build -f /etc/front/tgbot/Dockerfile . -t pytelebot_aria2c
 docker build -f Dockerfile . -t pytelebot_aria2c
 
+docker images|grep none|awk '{print $3 }'|xargs docker rmi
+
 docker run -v /etc/front/tgbot_config/config.py:/root/tgbot/tgbot/config.py --rm pytelebot_aria2c
 docker run -v /etc/front/tgbot_config/config.py:/root/tgbot/tgbot/config.py -d --name pytelebot_aria2c pytelebot_aria2c

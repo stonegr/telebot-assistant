@@ -89,6 +89,7 @@ bot.add_custom_filter(filters.AllowFilter())
 from columns import aria2
 
 aria2.Moniter_active(bot)
+aria2.Flush_data()
 
 # bot.enable_save_next_step_handlers(delay=2)
 # bot.load_next_step_handlers()
