@@ -3,6 +3,7 @@ systemctl status tgbot
 
 systemctl restart tgbot
 
+<<<<<<< HEAD
 systemctl enable tgbot
 
 docker build -f /etc/front/tgbot/Dockerfile . -t pytelebot_aria2c
@@ -12,3 +13,6 @@ docker images|grep none|awk '{print $3 }'|xargs docker rmi
 
 docker run -v /etc/front/tgbot_config/config.py:/root/tgbot/tgbot/config.py --rm pytelebot_aria2c
 docker run -v /etc/front/tgbot_config/config.py:/root/tgbot/tgbot/config.py -d --name pytelebot_aria2c pytelebot_aria2c
+=======
+systemctl enable tgbot
+>>>>>>> 04ef26e695433021c4aa11c2c6fe71596def9239

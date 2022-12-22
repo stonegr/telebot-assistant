@@ -109,51 +109,9 @@ def inline_callback(call, bot: TeleBot):
     elif call.json["message"]["text"] == "请点击要删除的任务":
         _aria2_tmp = aria2.Aria2_do(config.ARIA2_URL, config.ARIA2_SECREAT)
         if call.data.split("_")[0] != "删除":
-            d = aria2._tgbot_tmp.format_acivate_paused_stop()
-            if call.data.split("_")[0] == "删除正在下载":
-                _tasks_do = [
-                    v.get("gid") for v in d.values() if v.get("status") == "active"
-                ]
-            elif call.data.split("_")[0] == "删除已暂停":
-
-                _tasks_do = [
-                    v.get("gid") for v in d.values() if v.get("status") == "paused"
-                ]
-            elif call.data.split("_")[0] == "删除已完成":
-                _tasks_do = [
-                    v.get("gid") for v in d.values() if v.get("status") == "complete"
-                ]
-            elif call.data.split("_")[0] == "删除错误":
-                _tasks_do = [
-                    v.get("gid") for v in d.values() if v.get("status") == "error"
-                ]
-            elif call.data.split("_")[0] == "删除removed":
-                _tasks_do = [
-                    v.get("gid") for v in d.values() if v.get("status") == "removed"
-                ]
-            elif call.data.split("_")[0] == "删除所有":
-                _tasks_do = [v.get("gid") for v in d.values()]
-            for i in _tasks_do:
+            for i in call.data.split("_")[1].split(";"):
                 if i != "":
                     _aria2_tmp.remove_noerror(i)
         else:
             _aria2_tmp.remove_noerror(call.data.split("_")[1])
-        if call.data.split("_")[0] == "删除正在下载":
-            bot.answer_callback_query(
-                call.id,
-                "please click 删除removed again.",
-            )
-        else:
-            bot.answer_callback_query(call.id, "deleted")
-        while n < 5:
-            try:
-                time.sleep(1)
-                bot.edit_message_reply_markup(
-                    chat_id=call.message.chat.id,
-                    message_id=call.message.message_id,
-                    reply_markup=inline_keyboard("删除任务"),
-                )
-                break
-            except Exception as e:
-                print(e)
-                n += 1
+        bot.answer_callback_query(call.id, "deleted")
