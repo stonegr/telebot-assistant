@@ -8,7 +8,7 @@ from .keyboard import keyboard, inline_keyboard
 
 import basic
 from columns import aria2, douyin
-from tgbot import config
+from .. import config
 
 
 def menu_handle(message: Message, bot: TeleBot):

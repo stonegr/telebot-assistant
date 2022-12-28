@@ -1,8 +1,8 @@
 import re
 import requests, traceback
 
-from . import base
-import basic
+# from . import base
+# import basic
 
 
 class Douyin:
@@ -17,28 +17,15 @@ class Douyin:
         self.url = url
 
     def run(self):
-        res = self.s.get(self.url).url
-        ids = res.split("video/")[1].split("?")[0]
-        self.ids = ids
         return self.getVideoInfo()
 
     def getVideoInfo(self):
-        res = self.s.get(
-            "https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=" + self.ids
-        ).json()
+        res = self.s.get("https://api.missuo.me/douyin/?url=" + self.url).json()
         return {
-            "作者": res["item_list"][0]["author"]["nickname"],
-            "视频时长": base.Format_douyin_videotime(
-                res["item_list"][0]["video"]["duration"]
-            ),
-            "音频时长": basic.Format_second(res["item_list"][0]["music"]["duration"]),
-            "分辨率": str(res["item_list"][0]["video"]["height"])
-            + " x "
-            + str(res["item_list"][0]["video"]["width"]),
-            "视频链接": res["item_list"][0]["video"]["play_addr"]["url_list"][0]
-            .replace("playwm", "play")
-            .replace("720p", "9999"),
-            "音频链接": res["item_list"][0]["music"]["play_url"]["uri"],
+            "作者": res["nickname"],
+            "简介": res["desc"],
+            "视频链接": res["mp4"],
+            "音频链接": res["mp3"],
         }
 
 
@@ -54,7 +41,7 @@ def get_douyin(url):
 
         return url_judged
     else:
-        return "请检查你输入的链接是否正确，例如：https://v.douyin.com/6kAoWvc/"
+        return "请检查你输入的链接是否正确，例如: https://v.douyin.com/6kAoWvc/"
 
 
 # if __name__ == "__main__":
