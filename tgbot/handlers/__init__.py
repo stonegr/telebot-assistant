@@ -2,7 +2,6 @@
 
 from tgbot.handlers.basic_commond.admin import admin_user
 from tgbot.handlers.basic_commond.user import any_user
-from .douyin.douyin_command import douyin_handle
 from .basic_commond.reset_command import reset_handle
 from .basic_commond.not_access_command import notaccess_handle
 from .menu_command import menu_handle

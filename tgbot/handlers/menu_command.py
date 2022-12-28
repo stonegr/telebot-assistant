@@ -1,10 +1,13 @@
 import telebot
 from telebot import TeleBot
 from telebot.types import Message
+import re
 
 from .keyboard import keyboard, inline_keyboard
 
-from columns import aria2
+
+import basic
+from columns import aria2, douyin
 from tgbot import config
 
 
@@ -32,6 +35,9 @@ def menu_parse(message: Message, bot: TeleBot):
     elif message.text == "aria2c":
         msg = bot.reply_to(message, "aria2菜单", reply_markup=keyboard("Aria2c"))
         bot.register_next_step_handler_by_chat_id(message.chat.id, aria2_handle, bot)
+    elif message.text == "douyin":
+        msg = bot.reply_to(message, "请输入链接")
+        bot.register_next_step_handler_by_chat_id(message.chat.id, douyin_parse, bot)
     else:
         if not msg:
             msg = bot.reply_to(message, "输入错误,请重新输入!")
@@ -106,3 +112,17 @@ def add_aria2_task(message: Message, bot: TeleBot):
     except:
         bot.reply_to(message, "格式错误,请重试")
     bot.register_next_step_handler_by_chat_id(message.chat.id, aria2_handle, bot)
+
+
+# douyin
+def douyin_parse(message: Message, bot: TeleBot):
+    """
+    解析抖音链接
+    """
+
+    if not re.findall(r"http[s]?://v.douyin.com/\S+", message.text):
+        bot.reply_to(message, "未检测到url, 已退出!")
+    else:
+        judged_url = douyin.get_douyin(message.text)
+        bot.reply_to(message, basic.Format_json(judged_url)),
+    bot.register_next_step_handler_by_chat_id(message.chat.id, menu_parse, bot)

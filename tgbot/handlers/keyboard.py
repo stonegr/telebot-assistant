@@ -10,7 +10,10 @@ from .. import config
 def keyboard(key_type="Normal"):
     markup = ReplyKeyboardMarkup(row_width=10)
     if key_type == "Normal":
-        row = [KeyboardButton("aria2c")]
+        row = [
+            KeyboardButton("aria2c"),
+            KeyboardButton("douyin"),
+        ]
         markup.add(*row)
         row = [KeyboardButton("Exit")]
         markup.add(*row)

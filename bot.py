@@ -59,10 +59,6 @@ def register_handlers():
     bot.register_message_handler(
         handlers.reset_handle, commands=["reset"], allow_user=True, pass_bot=True
     )
-    # 抖音
-    bot.register_message_handler(
-        handlers.douyin_handle, commands=["douyin"], allow_user=True, pass_bot=True
-    )
 
     # menu
     bot.register_message_handler(
